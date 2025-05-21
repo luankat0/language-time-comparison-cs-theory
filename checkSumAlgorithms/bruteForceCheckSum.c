@@ -6,6 +6,30 @@
 
 #define MAX_TARGET 1000000
 
+int main() {
+    char filename[100], fullpath[150];
+    int arr[100000], n = 0, target;
+
+    printf("Digite o nome do arquivo (ex: subset_1000.txt): ");
+    scanf("%s", filename);
+
+    printf("Digite o valor da soma alvo: ");
+    scanf("%d", &target);
+
+    sprintf(fullpath, "../../data/%s", filename);
+    FILE *file = fopen(fullpath, "r");
+    if (!file) {
+        printf("Erro ao abrir o arquivo.\n");
+        return 1;
+    }
+
+    while (fscanf(file, "%d", &arr[n]) == 1 && n < 100000) n++;
+    fclose(file);
+
+    subsetSumDP(arr, n, target);
+    return 0;
+}
+
 double get_elapsed_us(LARGE_INTEGER start, LARGE_INTEGER end, LARGE_INTEGER freq) {
     return (double)(end.QuadPart - start.QuadPart) * 1000000.0 / (double)freq.QuadPart;
 }
@@ -62,30 +86,4 @@ bool subsetSumDP(int arr[], int n, int target) {
     free(dp);
     free(prev);
     return true;
-}
-
-
-
-int main() {
-    char filename[100], fullpath[150];
-    int arr[100000], n = 0, target;
-
-    printf("Digite o nome do arquivo (ex: subset_1000.txt): ");
-    scanf("%s", filename);
-
-    printf("Digite o valor da soma alvo: ");
-    scanf("%d", &target);
-
-    sprintf(fullpath, "../../data/%s", filename);
-    FILE *file = fopen(fullpath, "r");
-    if (!file) {
-        printf("Erro ao abrir o arquivo.\n");
-        return 1;
-    }
-
-    while (fscanf(file, "%d", &arr[n]) == 1 && n < 100000) n++;
-    fclose(file);
-
-    subsetSumDP(arr, n, target);
-    return 0;
 }
