@@ -1,11 +1,11 @@
-
 import time
 import os
+import csv
 
 def get_elapsed_us(start, end):
     return (end - start) * 1_000_000
 
-def subset_sum_dp(arr, target):
+def subset_sum_dp(arr, target, filename):
     dp = [False] * (target + 1)
     prev = [0] * (target + 1)
     
@@ -24,6 +24,8 @@ def subset_sum_dp(arr, target):
     
     if not dp[target]:
         print(f"Nenhum subconjunto encontrado com soma {target}.")
+        # Salva no CSV mesmo quando não encontra
+        save_to_csv(filename, target, total_time_ms, False)
         return False
     
     print(f"Subconjunto encontrado com soma {target}: {{ ", end="")
@@ -45,7 +47,24 @@ def subset_sum_dp(arr, target):
     print(f"Tempo total da busca: {total_time_ms:.2f} milissegundos")
     print(f"ou {total_time_ms / 1000:.4f} segundos")
     
+    # Salva os resultados no CSV
+    save_to_csv(filename, target, total_time_ms, True)
+    
     return True
+
+def save_to_csv(filename, target, total_time_ms, found):
+    csv_filename = os.path.join("..", "data", "subset_results.csv")
+    
+    # Verifica se o arquivo já existe para decidir se escreve o cabeçalho
+    file_exists = os.path.isfile(csv_filename)
+    
+    with open(csv_filename, mode='a', newline='') as file:
+        writer = csv.writer(file)
+        
+        if not file_exists:
+            writer.writerow(["Arquivo", "Target", "Tempo (ms)", "Encontrado"])
+        
+        writer.writerow([filename, target, f"{total_time_ms:.2f}", "Sim" if found else "Não"])
 
 def main():
     filename = input("Digite o nome do arquivo (ex: subset_1000.txt): ")
@@ -60,7 +79,7 @@ def main():
         print("Erro ao abrir o arquivo.")
         return
     
-    subset_sum_dp(arr, target)
+    subset_sum_dp(arr, target, filename)
 
 if __name__ == "__main__":
     main()
