@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 #define MAX_TARGET 1000000
 
@@ -10,9 +11,9 @@ double get_elapsed_us(LARGE_INTEGER start, LARGE_INTEGER end, LARGE_INTEGER freq
     return (double)(end.QuadPart - start.QuadPart) * 1000000.0 / (double)freq.QuadPart;
 }
 
-bool subsetSumDP(int arr[], int n, int target) {
+bool subsetSumDP(int arr[], int n, int target, double *tempo_total_ms) {
     bool *dp = calloc(target + 1, sizeof(bool));
-    int *prev = calloc(target + 1, sizeof(int));  // para reconstruir o caminho
+    int *prev = calloc(target + 1, sizeof(int));
 
     dp[0] = true;
 
@@ -24,67 +25,65 @@ bool subsetSumDP(int arr[], int n, int target) {
         for (int j = target; j >= arr[i]; j--) {
             if (dp[j - arr[i]] && !dp[j]) {
                 dp[j] = true;
-                prev[j] = i + 1; // guarda índice + 1 para diferenciar de 0
+                prev[j] = i + 1;
             }
         }
     }
 
     QueryPerformanceCounter(&end_total);
-    double total_time_ms = get_elapsed_us(start_total, end_total, freq) / 1000.0;
+    *tempo_total_ms = get_elapsed_us(start_total, end_total, freq) / 1000.0;
 
-    if (!dp[target]) {
-        printf("Nenhum subconjunto encontrado com soma %d.\n", target);
-        free(dp);
-        free(prev);
-        return false;
-    }
-
-    // Reconstruir subconjunto com tempo acumulado por elemento
-    printf("Subconjunto encontrado com soma %d: { ", target);
-    int curr = target;
-
-    while (curr > 0) {
-        LARGE_INTEGER start_element, end_element;
-        QueryPerformanceCounter(&start_element);
-
-        int idx = prev[curr] - 1;
-        printf("\n\t%d ", arr[idx]);
-        curr -= arr[idx];
-
-        QueryPerformanceCounter(&end_element);
-        double elapsed_us = get_elapsed_us(start_element, end_element, freq);
-        printf("(tempo para este elemento: %.3f microsegundos)\n", elapsed_us);
-    }
-    printf("}\n");
-
-    printf("Tempo total da busca: %.2f milissegundos\n ou %.4f segundos", total_time_ms, total_time_ms / 1000.0);
+    bool resultado = dp[target];
 
     free(dp);
     free(prev);
-    return true;
+    return resultado;
 }
 
 int main() {
+    srand(time(NULL));
+
     char filename[100], fullpath[150];
     int arr[100000], n = 0, target;
+    FILE *inFile, *outFile;
 
-    printf("Digite o nome do arquivo (ex: subset_1000.txt): ");
+    printf("Digite o nome do arquivo de entrada (ex: subset_1000.txt): ");
     scanf("%s", filename);
-
-    printf("Digite o valor da soma alvo: ");
-    scanf("%d", &target);
-
     sprintf(fullpath, "../../data/%s", filename);
-    FILE *file = fopen(fullpath, "r");
-    if (!file) {
-        printf("Erro ao abrir o arquivo.\n");
+
+    // Captura o nome base do arquivo (sem extensão)
+    char *ponto = strchr(filename, '.');
+    if (ponto != NULL) *ponto = '\0';  // remove extensão
+
+    inFile = fopen(fullpath, "r");
+    if (!inFile) {
+        printf("Erro ao abrir o arquivo de entrada.\n");
         return 1;
     }
 
-    while (fscanf(file, "%d", &arr[n]) == 1 && n < 100000) n++;
-    fclose(file);
+    while (fscanf(inFile, "%d", &arr[n]) == 1 && n < 100000) n++;
+    fclose(inFile);
 
-    subsetSumDP(arr, n, target);
+    outFile = fopen("dataBaseC.csv", "w");
+    if (!outFile) {
+        printf("Erro ao criar arquivo CSV de saída.\n");
+        return 1;
+    }
+
+    fprintf(outFile, "Target;Tempo Total (ms);Subset\n");
+
+    for (int cont = 0; cont < 100; cont++) {
+        target = rand() % MAX_TARGET;
+
+        double tempo_total;
+        bool encontrado = subsetSumDP(arr, n, target, &tempo_total);
+
+        if (encontrado) {
+            fprintf(outFile, "%d;%.3f;%s\n", target, tempo_total, filename);
+        }
+    }
+
+    fclose(outFile);
+    printf("Execução concluída. Resultados salvos em dataBaseC.csv\n");
     return 0;
 }
-
