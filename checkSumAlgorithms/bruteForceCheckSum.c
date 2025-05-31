@@ -20,7 +20,7 @@ int subset_sum_bruteforce(int *arr, int n, int target) {
 }
 
 int main(void) {
-    int sizes[] = {10,20,30};
+    int sizes[] = {5 ,15 ,25};
     int num_sizes = sizeof(sizes) / sizeof(sizes[0]);
 
     srand((unsigned) time(NULL));
@@ -52,7 +52,7 @@ int main(void) {
         clock_t t_end = clock();
 
         double seconds = (double)(t_end - t_start) / CLOCKS_PER_SEC;
-        printf("n = %2d | target = %3d | found = %d | time = %.6f s\n", n, target, found, seconds);
+        printf("n = %2d | target = %3d | found = %d | time = %.6f s\n\n", n, target, found, seconds);
 
         free(arr);
 

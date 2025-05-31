@@ -10,11 +10,11 @@ def gerar_arquivo(nome_arquivo, quantidade, limite_superior):
         for numero in numeros:
             arquivo.write(f"{numero}\n")
 
-# Arquivo com 1000 números únicos
-gerar_arquivo("data/subset_1000.txt", 1000, 1000)
+# Arquivo com 5 números únicos
+gerar_arquivo("data/subset_pequeno.txt", 5, 100)
 
-# Arquivo com 10000 números únicos
-gerar_arquivo("data/subset_10000.txt", 10000, 10000)
+# Arquivo com 15 números únicos
+gerar_arquivo("data/subset_medio.txt", 15, 100)
 
-# Arquivo com 100000 números únicos
-gerar_arquivo("data/subset_100000.txt", 100000, 100000)
+# Arquivo com 25 números únicos
+gerar_arquivo("data/subset_grande.txt", 25, 100)

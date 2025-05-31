@@ -17,7 +17,7 @@ def brute_force_check_sum(arr, n, target):
     return False
 
 def main():
-    sizes = [10, 20, 30]
+    sizes = [5, 15, 25]
     num_sizes = len(sizes)
 
     for idx in range(num_sizes):
