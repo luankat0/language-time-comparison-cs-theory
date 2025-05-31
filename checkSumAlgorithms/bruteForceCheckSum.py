@@ -1,38 +1,69 @@
 import time
-import os
-import random
+import csv
+
+LCG_SEED = 12345
+
+lcg_state = LCG_SEED
+
+def lcg_rand():
+    global lcg_state
+    lcg_state = (1103515245 * lcg_state + 12345) & 0x7fffffff
+    return lcg_state
 
 def brute_force_check_sum(arr, n, target):
     total_masks = 1 << n
-
     for mask in range(total_masks):
-        sum = 0
-
+        soma = 0
         for i in range(n):
             if mask & (1 << i):
-                sum += arr[i]
-        
-        if sum == target:
+                soma += arr[i]
+        if soma == target:
             return True
     return False
 
+def ler_arquivo(caminho):
+    with open(caminho, "r") as f:
+        return [int(linha.strip()) for linha in f]
+
+def testar_subset(caminho):
+    arr = ler_arquivo(caminho)
+    n = len(arr)
+
+    soma_total = sum(arr)
+    target = lcg_rand() % (soma_total + 1)
+
+    start = time.time()
+    found = brute_force_check_sum(arr, n, target)
+    end = time.time()
+    duracao = end - start
+
+    return n, target, found, duracao
+
 def main():
-    sizes = [5, 15, 25]
-    num_sizes = len(sizes)
+    subsets = {
+        "data/subset_pequeno.txt": None,
+        "data/subset_medio.txt": None,
+        "data/subset_grande.txt": None
+    }
 
-    for idx in range(num_sizes):
-        n = sizes[idx]
-        arr = [random.randint(0, 99) for _ in range(n)]
-        target = random.randint(0, n * 100 - 1)
+    with open("data/dataBasePython.csv", mode="w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["iteracao", "arquivo", "n", "target", "found", "duracao"])
 
-        print(f"n = {n:2d} | Array: {arr}")
-        print(f"target = {target}")
+        for iteracao in range(1, 51):
 
-        start_time = time.time()
-        found = brute_force_check_sum(arr, n, target)
-        end_time = time.time()
+            for caminho in subsets.keys():
+                n, target, found, duracao = testar_subset(caminho)
 
-        print(f"found = {int(found)} | time = {end_time - start_time:.6f} s\n")
+                writer.writerow([
+                    iteracao,
+                    caminho,
+                    n,
+                    target,
+                    int(found),       
+                    f"{duracao:.6f}"
+                ])
+                print(f"{iteracao}, {caminho}, {n}, {target}, {int(found)}, {duracao:.6f}")
 
 if __name__ == "__main__":
     main()
